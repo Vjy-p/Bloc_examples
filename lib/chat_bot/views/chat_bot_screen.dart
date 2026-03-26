@@ -9,9 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class ChatBotScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
-
   ChatBotScreen({super.key});
+  final TextEditingController textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +31,7 @@ class ChatBotScreen extends StatelessWidget {
                 child: BlocBuilder<ChatBotBloc, ChatBotState>(
                   builder: (context, state) {
                     return ListView.builder(
+                      physics: BouncingScrollPhysics(),
                       itemCount: state.messages.length,
                       itemBuilder: (context, index) {
                         final msg = state.messages[index];
@@ -98,7 +98,7 @@ class ChatBotScreen extends StatelessWidget {
                     // ),
                     Expanded(
                       child: TextField(
-                        controller: _controller,
+                        controller: textController,
                         decoration: InputDecoration(
                           hintText: "Type a message...",
                           enabled: true,
@@ -151,11 +151,11 @@ class ChatBotScreen extends StatelessWidget {
                               : () {
                                   context.read<ChatBotBloc>().add(
                                     SendMessageEvent(
-                                      _controller.text,
+                                      textController.text,
                                       state.selectedImage,
                                     ),
                                   );
-                                  _controller.clear();
+                                  textController.clear();
                                 },
                         );
                       },

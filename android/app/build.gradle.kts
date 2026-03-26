@@ -5,6 +5,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+def dartEnvironmentVariables = []
+if (project.hasProperty('dart-defines')) {
+    dartEnvironmentVariables = project.property('dart-defines').split(',').collectEntries {
+        def pair = new String(it.decodeBase64(), 'UTF-8').split('=')
+        [(pair[0]): pair[1]]
+    }
+}
+
 android {
     namespace = "com.example.bloc_examples"
     compileSdk = flutter.compileSdkVersion
@@ -28,6 +36,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        manifestPlaceholders = [
+            GOOGLE_MAPS_KEY: dartEnvironmentVariables.GOOGLE_MAPS_KEY ?: ""
+        ]
     }
 
     buildTypes {

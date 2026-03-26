@@ -1,3 +1,4 @@
+import 'package:bloc_examples/address/views/address_screen.dart';
 import 'package:bloc_examples/cart/bloc/cart_bloc.dart';
 import 'package:bloc_examples/cart/bloc/cart_event.dart';
 import 'package:bloc_examples/cart/bloc/cart_state.dart';
@@ -90,7 +91,14 @@ class _CartScreenState extends State<CartScreen> {
       bottomNavigationBar: BottomAppBar(
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 16),
-        child: customButton(text: "Proceed", onTap: () {}),
+        child: customButton(
+          text: "Proceed",
+          onTap: () {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => AddressScreen()));
+          },
+        ),
       ),
     );
   }

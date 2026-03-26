@@ -66,7 +66,31 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- Permissions -->
 	<key>NSPhotoLibraryUsageDescription</key>
-  <string>Replace with your permission description.</string>
+	<string>This app needs access to your photos to upload chat images.</string>
+	
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to show your current position on the map.</string>
+	
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to your location to show your current position on the map even when in the background.</string>
+	
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to show your current position on the map.</string>
+
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+
+	<!-- Google Maps / Views Configuration -->
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
+	
+	<key>GoogleMapsApiKey</key>
+	<string>$(GOOGLE_MAPS_KEY)</string>
 </dict>
 </plist>

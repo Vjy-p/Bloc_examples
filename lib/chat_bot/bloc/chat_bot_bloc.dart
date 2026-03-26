@@ -14,10 +14,9 @@ class ChatBotBloc extends Bloc<ChatBotEvent, ChatBotState> {
 
   ChatBotBloc() : super(const ChatBotState()) {
     // Initialize Gemini
-    _model = GenerativeModel(
-      model: 'gemini-2.5-flash',
-      apiKey: 'AIzaSyCCm0DLJBcfqsJojgU0PKR9qmhAs5xm9UM',
-    );
+    const String geminiApiKey = String.fromEnvironment('AI_KEY');
+    // log("AI Key $geminiApiKey");
+    _model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: geminiApiKey);
     _chatSession = _model.startChat();
 
     on<PickImageEvent>(_onPickImage);
@@ -59,7 +58,8 @@ class ChatBotBloc extends Bloc<ChatBotEvent, ChatBotState> {
     );
 
     try {
-      String? responseText;
+      Stream<GenerateContentResponse> responseStream;
+      // String? responseText;
 
       if (event.image != null) {
         // Multi-modal request (Image + Text)
@@ -67,26 +67,58 @@ class ChatBotBloc extends Bloc<ChatBotEvent, ChatBotState> {
         final content = [
           Content.multi([TextPart(event.text), DataPart('image/jpeg', bytes)]),
         ];
-        final response = await _model.generateContent(content);
-        responseText = response.text;
+        // final response = await _model.generateContent(content);
+        // responseText = response.text;
+
+        responseStream = _model.generateContentStream(content);
       } else {
         // Text-only request (uses session history)
-        final response = await _chatSession.sendMessage(
+        // final response = await _chatSession.sendMessage(
+        //   Content.text(event.text),
+        // );
+        // log(
+        //   "response ${response.text} ${response.candidates} $response ${response.usageMetadata}",
+        // );
+        // responseText = response.text;
+
+        responseStream = _chatSession.sendMessageStream(
           Content.text(event.text),
         );
-        responseText = response.text;
       }
 
-      final botMsg = ChatMessage(
-        text: responseText ?? "No response",
-        role: ChatRole.model,
-      );
-      emit(
-        state.copyWith(
-          messages: List.from(state.messages)..add(botMsg),
-          isLoading: false,
-        ),
-      );
+      // final botMsg = ChatMessage(
+      //   text: responseText ?? "No response",
+      //   role: ChatRole.model,
+      // );
+      // emit(
+      //   state.copyWith(
+      //     messages: List.from(state.messages)..add(botMsg),
+      //     isLoading: false,
+      //   ),
+      // );
+
+      String fullText = "";
+      await for (final chunk in responseStream) {
+        final chunkText = chunk.text ?? "";
+        fullText += chunkText;
+        final currentMessages = List<ChatMessage>.from(state.messages);
+        log("count11 ${currentMessages.length}");
+        if (currentMessages.isNotEmpty) {
+          if (currentMessages.last.role == ChatRole.model) {
+            currentMessages.last = ChatMessage(
+              text: fullText,
+              role: ChatRole.model,
+            );
+          } else {
+            currentMessages.add(
+              ChatMessage(text: fullText, role: ChatRole.model),
+            );
+          }
+
+          emit(state.copyWith(messages: currentMessages, isLoading: true));
+        }
+      }
+      emit(state.copyWith(isLoading: false));
     } catch (e) {
       log("Error sending the message $e");
       emit(state.copyWith(isLoading: false));
